@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posting Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 24px;
+        }
+        h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        h2 { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #fff; }
+        .subtitle { color: #888; font-size: 14px; margin-bottom: 32px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .card-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .card-value { font-size: 36px; font-weight: 700; }
+        .card-sub { font-size: 13px; color: #666; margin-top: 4px; }
+        .green { color: #4ade80; }
+        .blue { color: #60a5fa; }
+        .purple { color: #c084fc; }
+        .orange { color: #fb923c; }
+        .red { color: #f87171; }
+        .section { margin-bottom: 40px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+        .month {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .month-name { font-weight: 600; font-size: 16px; margin-bottom: 12px; text-align: center; }
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 4px;
+        }
+        .weekday { text-align: center; font-size: 11px; color: #666; padding: 4px; }
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+        .day {
+            text-align: center;
+            padding: 6px 2px;
+            font-size: 13px;
+            border-radius: 6px;
+            position: relative;
+            min-height: 36px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .day.today { background: #2a2a3a; border: 1px solid #60a5fa; }
+        .day.empty { }
+        .dots { display: flex; gap: 3px; margin-top: 2px; }
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        .dot.daily-published { background: #4ade80; }
+        .dot.daily-scheduled { background: #4ade8060; }
+        .dot.infographic-published { background: #c084fc; }
+        .dot.infographic-scheduled { background: #c084fc60; }
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #888; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .log-table th {
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 1px solid #2a2a2a;
+            color: #888;
+            font-weight: 500;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        .log-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-ok { background: #4ade8020; color: #4ade80; }
+        .badge-error { background: #f8717120; color: #f87171; }
+        .badge-linkedin { background: #0077b520; color: #60a5fa; }
+        .badge-twitter { background: #1d9bf020; color: #60a5fa; }
+        .status-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+        .status-dot.error { background: #f87171; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .progress-bar {
+            height: 6px;
+            background: #2a2a2a;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        .refresh-note { text-align: center; color: #444; font-size: 12px; margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <h1>Posting Dashboard</h1>
+    <p class="subtitle">LinkedIn + Twitter automatizace | {{ today }}</p>
+
+    <div class="status-bar">
+        <div class="status-item">
+            <div class="status-dot {% if errors %}error{% endif %}"></div>
+            <span>{% if errors %}{{ errors|length }} error(s){% else %}Vše OK{% endif %}</span>
+        </div>
+        <div class="status-item">
+            <span style="color: #888;">9:00 Daily post</span>
+            <span class="badge badge-ok">Active</span>
+        </div>
+        <div class="status-item">
+            <span style="color: #888;">16:00 Infographic</span>
+            <span class="badge badge-ok">Active</span>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-label">LinkedIn posty</div>
+            <div class="card-value green">{{ total_linkedin }}</div>
+            <div class="card-sub">publikovano celkem</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Twitter posty</div>
+            <div class="card-value blue">{{ total_twitter }}</div>
+            <div class="card-sub">publikovano celkem</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Naplanovano</div>
+            <div class="card-value purple">{{ total_scheduled }}</div>
+            <div class="card-sub">zbyvajicich postu</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Celkem obsahu</div>
+            <div class="card-value orange">{{ daily.total + infographic.total }}</div>
+            <div class="card-sub">{{ daily.total }} daily + {{ infographic.total }} infographic</div>
+        </div>
+    </div>
+
+    <!-- Daily posts progress -->
+    <div class="section">
+        <h2>Daily Posts (9:00)</h2>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="font-size: 13px;">{{ daily.published }}/{{ daily.total }} publikovano</span>
+                <span style="font-size: 13px; color: #888;">
+                    {% if daily.total > 0 %}{{ ((daily.published / daily.total) * 100)|round|int }}%{% endif %}
+                </span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {% if daily.total > 0 %}{{ (daily.published / daily.total * 100)|round }}{% else %}0{% endif %}%; background: #4ade80;"></div>
+            </div>
+            <div class="card-sub" style="margin-top: 8px;">
+                {% if daily.start_date %}{{ daily.start_date }} - {{ daily.end_date }}{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Infographic posts progress -->
+    <div class="section">
+        <h2>Infographic Posts (16:00)</h2>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="font-size: 13px;">{{ infographic.published }}/{{ infographic.total }} publikovano</span>
+                <span style="font-size: 13px; color: #888;">
+                    {% if infographic.total > 0 %}{{ ((infographic.published / infographic.total) * 100)|round|int }}%{% endif %}
+                </span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {% if infographic.total > 0 %}{{ (infographic.published / infographic.total * 100)|round }}{% else %}0{% endif %}%; background: #c084fc;"></div>
+            </div>
+            <div class="card-sub" style="margin-top: 8px;">
+                {% if infographic.start_date %}{{ infographic.start_date }} - {{ infographic.end_date }}{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="section">
+        <h2>Kalendar</h2>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background: #4ade80;"></div> Daily (publikovano)</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #4ade8060;"></div> Daily (planovano)</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #c084fc;"></div> Infographic (publikovano)</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #c084fc60;"></div> Infographic (planovano)</div>
+        </div>
+        <div class="calendar-grid">
+            {% for month in calendar %}
+            <div class="month">
+                <div class="month-name">{{ month.name }}</div>
+                <div class="weekdays">
+                    <div class="weekday">Po</div>
+                    <div class="weekday">Ut</div>
+                    <div class="weekday">St</div>
+                    <div class="weekday">Ct</div>
+                    <div class="weekday">Pa</div>
+                    <div class="weekday">So</div>
+                    <div class="weekday">Ne</div>
+                </div>
+                <div class="days">
+                    {% for week in month.weeks %}
+                        {% for day in week %}
+                            {% if day %}
+                            <div class="day {% if day.is_today %}today{% endif %}">
+                                {{ day.day }}
+                                {% if day.has_daily or day.has_infographic %}
+                                <div class="dots">
+                                    {% if day.has_daily %}
+                                    <div class="dot daily-{{ day.daily_status }}"></div>
+                                    {% endif %}
+                                    {% if day.has_infographic %}
+                                    <div class="dot infographic-{{ day.infographic_status }}"></div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="day empty"></div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Recent log -->
+    {% if log %}
+    <div class="section">
+        <h2>Posledni aktivita</h2>
+        <div class="card" style="overflow-x: auto;">
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>Cas</th>
+                        <th>Typ</th>
+                        <th>Obrazek</th>
+                        <th>LinkedIn</th>
+                        <th>Twitter</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in log|reverse %}
+                    <tr>
+                        <td>{{ entry.timestamp[:16] if entry.timestamp else '-' }}</td>
+                        <td>{{ entry.platform|default('daily') }}</td>
+                        <td>{{ entry.image|default('-') }}</td>
+                        <td>{{ entry.linkedin_id[:20] + '...' if entry.linkedin_id else '-' }}</td>
+                        <td>{{ entry.twitter_id[:20] + '...' if entry.twitter_id else '-' }}</td>
+                        <td>
+                            {% if entry.status == 'published' %}
+                            <span class="badge badge-ok">OK</span>
+                            {% else %}
+                            <span class="badge badge-error">Error</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <p class="refresh-note">Auto-refresh kazdych 60s | Data se aktualizuji pri kazdem postu</p>
+    <script>setTimeout(() => location.reload(), 60000);</script>
+</body>
+</html>
