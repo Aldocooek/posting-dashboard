@@ -926,6 +926,91 @@
             }
         }
 
+        /* ═══════════════════════════════════════
+           LUXURY SCROLL REVEAL SYSTEM
+           Premium staggered entrance animations
+           triggered by IntersectionObserver
+           ═══════════════════════════════════════ */
+
+        /* Base state — hidden, waiting to scroll in */
+        [data-reveal] {
+            opacity: 0;
+            transition:
+                opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform, filter;
+        }
+
+        /* Reveal variants — starting positions */
+        [data-reveal="up"] { transform: translateY(60px); filter: blur(4px); }
+        [data-reveal="down"] { transform: translateY(-40px); filter: blur(4px); }
+        [data-reveal="left"] { transform: translateX(-60px); filter: blur(4px); }
+        [data-reveal="right"] { transform: translateX(60px); filter: blur(4px); }
+        [data-reveal="scale"] { transform: scale(0.85); filter: blur(6px); }
+        [data-reveal="fade"] { filter: blur(3px); }
+        [data-reveal="rotate"] { transform: translateY(40px) rotate(-3deg); filter: blur(4px); }
+
+        /* Revealed state */
+        [data-reveal].revealed {
+            opacity: 1;
+            transform: translateY(0) translateX(0) scale(1) rotate(0deg);
+            filter: blur(0);
+        }
+
+        /* Stagger delays for children */
+        [data-reveal-stagger] > *:nth-child(1) { transition-delay: 0.00s; }
+        [data-reveal-stagger] > *:nth-child(2) { transition-delay: 0.08s; }
+        [data-reveal-stagger] > *:nth-child(3) { transition-delay: 0.16s; }
+        [data-reveal-stagger] > *:nth-child(4) { transition-delay: 0.24s; }
+        [data-reveal-stagger] > *:nth-child(5) { transition-delay: 0.32s; }
+        [data-reveal-stagger] > *:nth-child(6) { transition-delay: 0.40s; }
+        [data-reveal-stagger] > *:nth-child(7) { transition-delay: 0.48s; }
+
+        /* Speed variants */
+        [data-reveal-speed="fast"] { transition-duration: 0.5s !important; }
+        [data-reveal-speed="slow"] { transition-duration: 1.2s !important; }
+        [data-reveal-speed="glacial"] { transition-duration: 1.8s !important; }
+
+        /* Parallax scroll container */
+        [data-parallax] {
+            transition: transform 0.1s linear;
+            will-change: transform;
+        }
+
+        /* Smooth scroll progress indicator */
+        .scroll-progress {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 2px; z-index: 9999;
+            background: transparent;
+            pointer-events: none;
+        }
+        .scroll-progress-bar {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg,
+                var(--daily) 0%,
+                var(--infographic) 33%,
+                var(--evening) 66%,
+                var(--total) 100%);
+            border-radius: 0 99px 99px 0;
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+            transition: width 0.05s linear;
+        }
+
+        /* Section divider with fade */
+        .section-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                var(--border-medium) 20%,
+                var(--border-accent) 50%,
+                var(--border-medium) 80%,
+                transparent 100%);
+            margin: 8px 0 32px;
+            opacity: 0.5;
+        }
+
         /* === Tooltip === */
         .tooltip {
             position: absolute;
@@ -986,10 +1071,13 @@
 </defs>
 </svg>
 
+<!-- Scroll Progress Indicator -->
+<div class="scroll-progress"><div class="scroll-progress-bar" id="scroll-progress"></div></div>
+
 <div class="app"><div class="container">
 
 <!-- STATUS BAR -->
-<div class="status-bar" role="banner">
+<div class="status-bar" role="banner" data-reveal="down">
     <div class="sb-left">
         <div class="pulse-ring" aria-label="System active"></div>
         <span class="sb-text"><b>Online</b> &mdash; 3 automations active</span>
@@ -1003,7 +1091,7 @@
 </div>
 
 <!-- HEADER -->
-<header class="header">
+<header class="header" data-reveal="fade" data-reveal-speed="slow">
     <div class="brand">
         <div class="brand-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#gDaily)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1024,36 +1112,36 @@
 </header>
 
 <!-- STAT CARDS -->
-<section class="stats-grid" aria-label="Statistics">
-    <div class="stat-card linkedin">
+<section class="stats-grid" aria-label="Statistics" data-reveal-stagger>
+    <div class="stat-card linkedin" data-reveal="up">
         <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></div>
         <div class="stat-label">LinkedIn</div>
         <div class="stat-value" data-count="{{ total_linkedin }}">0</div>
         <div class="stat-sub">posts published</div>
         <svg class="sparkline" viewBox="0 0 100 32" preserveAspectRatio="none"><path d="M0,28 Q10,20 20,22 T40,16 T60,20 T80,10 T100,14 V32 H0Z" fill="url(#sparkLinkedin)"/></svg>
     </div>
-    <div class="stat-card twitter">
+    <div class="stat-card twitter" data-reveal="up">
         <div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
         <div class="stat-label">Twitter</div>
         <div class="stat-value" data-count="{{ total_twitter }}">0</div>
         <div class="stat-sub">tweets published</div>
         <svg class="sparkline" viewBox="0 0 100 32" preserveAspectRatio="none"><path d="M0,24 Q15,18 25,26 T50,12 T75,18 T100,8 V32 H0Z" fill="url(#sparkTwitter)"/></svg>
     </div>
-    <div class="stat-card eve">
+    <div class="stat-card eve" data-reveal="up">
         <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></div>
         <div class="stat-label">Evening</div>
         <div class="stat-value" data-count="{{ evening.published }}">0</div>
         <div class="stat-sub">of {{ evening.total }} text posts</div>
         <svg class="sparkline" viewBox="0 0 100 32" preserveAspectRatio="none"><path d="M0,30 Q20,22 30,26 T60,14 T80,22 T100,10 V32 H0Z" fill="url(#sparkEvening)"/></svg>
     </div>
-    <div class="stat-card sched">
+    <div class="stat-card sched" data-reveal="up">
         <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
         <div class="stat-label">Scheduled</div>
         <div class="stat-value" data-count="{{ total_scheduled }}">0</div>
         <div class="stat-sub">posts remaining</div>
         <svg class="sparkline" viewBox="0 0 100 32" preserveAspectRatio="none"><path d="M0,8 Q15,16 30,12 T55,20 T80,26 T100,30 V32 H0Z" fill="url(#sparkSched)"/></svg>
     </div>
-    <div class="stat-card total">
+    <div class="stat-card total" data-reveal="up">
         <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></div>
         <div class="stat-label">Total Pipeline</div>
         <div class="stat-value" data-count="{{ total_all }}">0</div>
@@ -1068,8 +1156,9 @@
 {% set eve_pct = ((evening.published / evening.total * 100)|round|int) if evening.total > 0 else 0 %}
 {% set C = 2 * 3.14159 * 30 %}
 
-<section class="progress-grid" aria-label="Progress">
-    <div class="progress-card daily-card">
+<div class="section-divider" data-reveal="fade" data-reveal-speed="slow"></div>
+<section class="progress-grid" aria-label="Progress" data-reveal-stagger>
+    <div class="progress-card daily-card" data-reveal="up">
         <div class="progress-header">
             <div class="progress-tag"><div class="progress-dot daily"></div><span class="progress-name">Daily Posts</span></div>
             <span class="progress-time">09:00 CET</span>
@@ -1094,7 +1183,7 @@
         {% if daily.start_date %}<div class="progress-dates"><span>{{ daily.start_date }}</span><span>{{ daily.end_date }}</span></div>{% endif %}
     </div>
 
-    <div class="progress-card info-card">
+    <div class="progress-card info-card" data-reveal="up">
         <div class="progress-header">
             <div class="progress-tag"><div class="progress-dot info"></div><span class="progress-name">Infographics</span></div>
             <span class="progress-time">16:00 CET</span>
@@ -1119,7 +1208,7 @@
         {% if infographic.start_date %}<div class="progress-dates"><span>{{ infographic.start_date }}</span><span>{{ infographic.end_date }}</span></div>{% endif %}
     </div>
 
-    <div class="progress-card evening-card">
+    <div class="progress-card evening-card" data-reveal="up">
         <div class="progress-header">
             <div class="progress-tag"><div class="progress-dot eve"></div><span class="progress-name">Evening Posts</span></div>
             <span class="progress-time">20:00 CET</span>
@@ -1146,13 +1235,14 @@
 </section>
 
 <!-- CALENDAR -->
+<div class="section-divider" data-reveal="fade" data-reveal-speed="slow"></div>
 <section class="calendar-section" aria-label="Calendar">
-    <div class="section-header">
+    <div class="section-header" data-reveal="left">
         <div class="section-icon cal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
         <h2 class="section-title">Content Calendar</h2>
         <span class="section-badge">3 months</span>
     </div>
-    <div class="legend">
+    <div class="legend" data-reveal="fade">
         <div class="legend-item"><span class="legend-dot daily-pub"></span>Daily pub</div>
         <div class="legend-item"><span class="legend-dot daily-sch"></span>Daily sched</div>
         <div class="legend-item"><span class="legend-dot info-pub"></span>Info pub</div>
@@ -1161,9 +1251,9 @@
         <div class="legend-item"><span class="legend-dot eve-sch"></span>Evening sched</div>
         <div class="legend-item"><span class="legend-dot today"></span>Today</div>
     </div>
-    <div class="calendar-grid">
+    <div class="calendar-grid" data-reveal-stagger>
         {% for month in calendar %}
-        <div class="month-card">
+        <div class="month-card" data-reveal="scale">
             <div class="month-name">{{ month.name }}</div>
             <div class="weekdays">
                 <span class="weekday">Po</span><span class="weekday">&Uacute;t</span><span class="weekday">St</span>
@@ -1185,14 +1275,15 @@
 </section>
 
 <!-- ACTIVITY LOG -->
+<div class="section-divider" data-reveal="fade" data-reveal-speed="slow"></div>
 <section class="log-section" aria-label="Activity log">
-    <div class="section-header">
+    <div class="section-header" data-reveal="left">
         <div class="section-icon log"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div>
         <h2 class="section-title">Recent Activity</h2>
         <span class="section-badge">{{ log|length }}</span>
     </div>
     {% if log %}
-    <div class="log-wrapper">
+    <div class="log-wrapper" data-reveal="up" data-reveal-speed="slow">
         <table class="log-table">
             <thead><tr><th>Date</th><th>Platform</th><th>Type</th><th>Status</th><th class="hide-mobile">Message</th></tr></thead>
             <tbody>
@@ -1209,7 +1300,7 @@
         </table>
     </div>
     {% else %}
-    <div class="log-wrapper">
+    <div class="log-wrapper" data-reveal="up" data-reveal-speed="slow">
         <div class="empty-state">
             <div class="empty-icon">&#128203;</div>
             <p>No activity recorded yet</p>
@@ -1218,7 +1309,7 @@
     {% endif %}
 </section>
 
-<footer>
+<footer data-reveal="fade" data-reveal-speed="glacial">
     <span>Social Autopilot v4.0</span>
     <span class="dot"></span>
     <span>Auto-refresh 60s</span>
@@ -1471,19 +1562,75 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 55000);
 
-    // ═══ INTERSECTION OBSERVER FOR SECTIONS ═══
-    const observer = new IntersectionObserver((entries) => {
+    // ═══ LUXURY SCROLL REVEAL SYSTEM ═══
+    // Premium staggered entrance — elements appear with blur→clear, translate→0
+    const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
+                // Add revealed class with optional delay for stagger children
+                const parent = entry.target.parentElement;
+                if (parent && parent.hasAttribute('data-reveal-stagger')) {
+                    // Already handled by CSS nth-child delays
+                    entry.target.classList.add('revealed');
+                } else {
+                    entry.target.classList.add('revealed');
+                }
+                revealObserver.unobserve(entry.target); // one-shot
             }
         });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.progress-card, .month-card').forEach(el => {
-        observer.observe(el);
+    }, {
+        threshold: 0.08,
+        rootMargin: '0px 0px -60px 0px' // trigger slightly before fully visible
     });
+
+    document.querySelectorAll('[data-reveal]').forEach(el => {
+        revealObserver.observe(el);
+    });
+
+    // ═══ SCROLL PROGRESS BAR ═══
+    const scrollBar = document.getElementById('scroll-progress');
+    if (scrollBar) {
+        const updateScroll = () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            scrollBar.style.width = progress + '%';
+        };
+        window.addEventListener('scroll', updateScroll, { passive: true });
+        updateScroll();
+    }
+
+    // ═══ PARALLAX ON AURORA BACKGROUND ═══
+    const aurora = document.querySelector('.aurora');
+    if (aurora) {
+        window.addEventListener('scroll', () => {
+            const y = window.scrollY * 0.15;
+            aurora.style.transform = `translateY(${y}px)`;
+        }, { passive: true });
+    }
+
+    // ═══ HEADER PARALLAX (subtle) ═══
+    const header = document.querySelector('.header');
+    const statusBar = document.querySelector('.status-bar');
+    window.addEventListener('scroll', () => {
+        const y = window.scrollY;
+        if (header) {
+            const opacity = Math.max(0, 1 - y / 400);
+            header.style.opacity = opacity;
+            header.style.transform = `translateY(${y * 0.08}px)`;
+        }
+        if (statusBar && y > 100) {
+            statusBar.style.position = 'sticky';
+            statusBar.style.top = '12px';
+            statusBar.style.zIndex = '100';
+            statusBar.style.boxShadow = '0 8px 32px rgba(0,0,0,0.4)';
+        } else if (statusBar) {
+            statusBar.style.position = '';
+            statusBar.style.top = '';
+            statusBar.style.zIndex = '';
+            statusBar.style.boxShadow = '';
+        }
+    }, { passive: true });
 
 });
 </script>
