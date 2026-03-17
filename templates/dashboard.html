@@ -3,522 +3,1476 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="60">
     <title>Posting Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ===================================================================
+           RESET & FOUNDATIONS
+           =================================================================== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        :root {
+            --bg-primary: #06060e;
+            --bg-secondary: #0a0a16;
+            --bg-card: rgba(255, 255, 255, 0.025);
+            --bg-card-hover: rgba(255, 255, 255, 0.045);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-medium: rgba(255, 255, 255, 0.10);
+            --border-strong: rgba(255, 255, 255, 0.16);
+
+            --text-primary: #f0f0f8;
+            --text-secondary: #a0a0b8;
+            --text-tertiary: #5a5a72;
+            --text-muted: #3a3a4e;
+
+            --linkedin: #0077b5;
+            --linkedin-light: #60a5fa;
+            --linkedin-glow: rgba(96, 165, 250, 0.35);
+
+            --twitter: #1d9bf0;
+            --twitter-light: #38bdf8;
+            --twitter-glow: rgba(56, 189, 248, 0.35);
+
+            --daily: #22c55e;
+            --daily-light: #4ade80;
+            --daily-glow: rgba(74, 222, 128, 0.35);
+
+            --infographic: #8b5cf6;
+            --infographic-light: #c084fc;
+            --infographic-glow: rgba(192, 132, 252, 0.35);
+
+            --orange: #f97316;
+            --orange-light: #fb923c;
+            --orange-glow: rgba(251, 146, 60, 0.35);
+
+            --success: #4ade80;
+            --error: #f87171;
+            --warning: #fbbf24;
+
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+            --radius-full: 9999px;
+
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 48px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 60px rgba(120, 80, 255, 0.08);
+
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* ===================================================================
+           BODY & BACKGROUND SYSTEM
+           =================================================================== */
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #050510;
-            color: #e0e0f0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Animated gradient background */
-        body::before {
-            content: '';
+        /* Aurora mesh gradient background */
+        .aurora-bg {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .aurora-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
             background:
-                radial-gradient(ellipse at 20% 50%, rgba(120, 60, 255, 0.12) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(60, 180, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 60% 80%, rgba(255, 60, 170, 0.06) 0%, transparent 50%);
-            z-index: -1;
-            animation: bgShift 20s ease-in-out infinite alternate;
+                radial-gradient(ellipse 80% 50% at 20% 40%, rgba(99, 60, 255, 0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 70% at 75% 20%, rgba(29, 155, 240, 0.08) 0%, transparent 55%),
+                radial-gradient(ellipse 70% 50% at 50% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 60% at 85% 70%, rgba(244, 63, 94, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse 40% 40% at 10% 80%, rgba(34, 197, 94, 0.04) 0%, transparent 50%);
+            animation: auroraMove 25s ease-in-out infinite alternate;
         }
-        @keyframes bgShift {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
+        .aurora-bg::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background:
+                radial-gradient(ellipse 50% 80% at 60% 30%, rgba(56, 189, 248, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse 80% 40% at 30% 70%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+            animation: auroraMove2 30s ease-in-out infinite alternate;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+        @keyframes auroraMove {
+            0% { transform: translate(0%, 0%) rotate(0deg); }
+            25% { transform: translate(2%, -3%) rotate(1deg); }
+            50% { transform: translate(-1%, 2%) rotate(-0.5deg); }
+            75% { transform: translate(3%, 1%) rotate(0.5deg); }
+            100% { transform: translate(-2%, -1%) rotate(-1deg); }
+        }
+        @keyframes auroraMove2 {
+            0% { transform: translate(0%, 0%) rotate(0deg); }
+            33% { transform: translate(-3%, 2%) rotate(-1deg); }
+            66% { transform: translate(2%, -2%) rotate(0.5deg); }
+            100% { transform: translate(-1%, 3%) rotate(-0.5deg); }
+        }
 
-        /* Header */
+        /* Dot grid pattern overlay */
+        .dot-pattern {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        /* Noise texture overlay */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.018;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* ===================================================================
+           SCROLLBAR
+           =================================================================== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        /* ===================================================================
+           CONTAINER
+           =================================================================== */
+        .dashboard-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 40px 32px 60px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 24px 16px 48px;
+            }
+        }
+
+        /* ===================================================================
+           GLASS CARD SYSTEM
+           =================================================================== */
+        .glass {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px) saturate(1.2);
+            -webkit-backdrop-filter: blur(24px) saturate(1.2);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-smooth);
+        }
+        .glass:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-medium);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Animated gradient border card */
+        .glass-gradient {
+            position: relative;
+            background: var(--bg-card);
+            backdrop-filter: blur(24px) saturate(1.2);
+            -webkit-backdrop-filter: blur(24px) saturate(1.2);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-smooth);
+        }
+        .glass-gradient::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-lg);
+            padding: 1px;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.08),
+                rgba(255, 255, 255, 0.02),
+                rgba(255, 255, 255, 0.06),
+                rgba(255, 255, 255, 0.02)
+            );
+            background-size: 300% 300%;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: borderShimmer 8s linear infinite;
+            pointer-events: none;
+        }
+        .glass-gradient:hover::before {
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.16),
+                rgba(255, 255, 255, 0.04),
+                rgba(255, 255, 255, 0.12),
+                rgba(255, 255, 255, 0.04)
+            );
+            background-size: 300% 300%;
+            animation: borderShimmer 4s linear infinite;
+        }
+
+        @keyframes borderShimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ===================================================================
+           HEADER
+           =================================================================== */
         .header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 24px;
         }
-        .header-left h1 {
-            font-size: 32px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .brand-icon::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.08));
+        }
+        .brand-icon svg {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-title {
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #c4b5fd 0%, #60a5fa 30%, #34d399 60%, #c084fc 100%);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: titleGradient 6s ease-in-out infinite alternate;
         }
-        .header-left .subtitle {
-            color: #6b7280;
-            font-size: 14px;
-            margin-top: 4px;
-            font-weight: 400;
+        @keyframes titleGradient {
+            0% { background-position: 0% center; }
+            100% { background-position: 100% center; }
         }
 
-        /* Status pills */
-        .status-bar {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .status-pill {
+        .header-subtitle {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            font-weight: 400;
+            margin-top: 6px;
+            letter-spacing: 0.01em;
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 100px;
-            font-size: 13px;
-            font-weight: 500;
-            backdrop-filter: blur(10px);
         }
-        .pulse-dot {
-            width: 8px; height: 8px;
+        .header-subtitle .separator {
+            width: 4px;
+            height: 4px;
             border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-        .pulse-dot.green { background: #4ade80; box-shadow: 0 0 8px #4ade8080; }
-        .pulse-dot.red { background: #f87171; box-shadow: 0 0 8px #f8717180; }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.85); }
+            background: var(--text-muted);
         }
 
-        /* Stats grid */
+        /* Status bar */
+        .status-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            backdrop-filter: blur(16px);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+        .status-pill:hover {
+            border-color: var(--border-medium);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            position: relative;
+        }
+        .pulse-dot::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            animation: pulseRing 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .pulse-dot.green {
+            background: var(--success);
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+        .pulse-dot.green::after {
+            background: rgba(74, 222, 128, 0.15);
+        }
+        .pulse-dot.red {
+            background: var(--error);
+            box-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+        }
+        .pulse-dot.red::after {
+            background: rgba(248, 113, 113, 0.15);
+        }
+        @keyframes pulseRing {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.8); opacity: 0; }
+        }
+
+        .time-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.02em;
+        }
+        .time-badge.daily {
+            background: rgba(74, 222, 128, 0.1);
+            color: var(--daily-light);
+            border: 1px solid rgba(74, 222, 128, 0.15);
+        }
+        .time-badge.infographic {
+            background: rgba(192, 132, 252, 0.1);
+            color: var(--infographic-light);
+            border: 1px solid rgba(192, 132, 252, 0.15);
+        }
+
+        /* ===================================================================
+           STATS GRID
+           =================================================================== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
-        @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
+
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 540px) {
+            .stats-grid { grid-template-columns: 1fr; }
+        }
 
         .stat-card {
             position: relative;
-            padding: 24px;
-            border-radius: 16px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            backdrop-filter: blur(20px);
+            padding: 28px 24px 24px;
+            border-radius: var(--radius-lg);
+            background: var(--bg-card);
+            backdrop-filter: blur(24px) saturate(1.2);
+            -webkit-backdrop-filter: blur(24px) saturate(1.2);
+            border: 1px solid var(--border-subtle);
             overflow: hidden;
-            transition: transform 0.2s, border-color 0.2s;
+            transition: all var(--transition-smooth);
+            cursor: default;
         }
         .stat-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255,255,255,0.12);
+            transform: translateY(-4px) scale(1.01);
+            border-color: var(--border-medium);
+            box-shadow: var(--shadow-lg);
         }
+
+        /* Top accent bar */
         .stat-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 3px;
-            border-radius: 16px 16px 0 0;
+            opacity: 0.8;
+            transition: opacity var(--transition-fast);
         }
-        .stat-card.linkedin::before { background: linear-gradient(90deg, #0077b5, #60a5fa); }
-        .stat-card.twitter::before { background: linear-gradient(90deg, #1d9bf0, #38bdf8); }
-        .stat-card.scheduled::before { background: linear-gradient(90deg, #a78bfa, #c084fc); }
-        .stat-card.total::before { background: linear-gradient(90deg, #fb923c, #f97316); }
+        .stat-card:hover::before { opacity: 1; }
 
-        .stat-icon {
-            width: 40px; height: 40px;
-            border-radius: 10px;
+        .stat-card.linkedin::before { background: linear-gradient(90deg, var(--linkedin), var(--linkedin-light)); }
+        .stat-card.twitter::before { background: linear-gradient(90deg, var(--twitter), var(--twitter-light)); }
+        .stat-card.scheduled::before { background: linear-gradient(90deg, var(--infographic), var(--infographic-light)); }
+        .stat-card.total::before { background: linear-gradient(90deg, var(--orange), var(--orange-light)); }
+
+        /* Ambient glow on hover */
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            width: 80%;
+            height: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity var(--transition-smooth);
+            pointer-events: none;
+            filter: blur(40px);
+        }
+        .stat-card:hover::after { opacity: 1; }
+        .stat-card.linkedin::after { background: rgba(96, 165, 250, 0.06); }
+        .stat-card.twitter::after { background: rgba(56, 189, 248, 0.06); }
+        .stat-card.scheduled::after { background: rgba(192, 132, 252, 0.06); }
+        .stat-card.total::after { background: rgba(251, 146, 60, 0.06); }
+
+        .stat-card-inner {
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            position: relative;
         }
-        .stat-icon.linkedin { background: rgba(0,119,181,0.15); }
-        .stat-icon.twitter { background: rgba(29,155,240,0.15); }
-        .stat-icon.scheduled { background: rgba(167,139,250,0.15); }
-        .stat-icon.total { background: rgba(251,146,60,0.15); }
+        .stat-icon-wrap.linkedin { background: rgba(0, 119, 181, 0.12); border: 1px solid rgba(0, 119, 181, 0.15); }
+        .stat-icon-wrap.twitter { background: rgba(29, 155, 240, 0.12); border: 1px solid rgba(29, 155, 240, 0.15); }
+        .stat-icon-wrap.scheduled { background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.15); }
+        .stat-icon-wrap.total { background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.15); }
 
         .stat-label {
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #6b7280;
-            margin-bottom: 8px;
-        }
-        .stat-value {
-            font-size: 40px;
-            font-weight: 800;
-            line-height: 1;
-        }
-        .stat-value.linkedin { color: #60a5fa; }
-        .stat-value.twitter { color: #38bdf8; }
-        .stat-value.scheduled { color: #c084fc; }
-        .stat-value.total { color: #fb923c; }
-        .stat-sub {
-            font-size: 13px;
-            color: #4b5563;
-            margin-top: 6px;
-            font-weight: 500;
+            letter-spacing: 1.8px;
+            color: var(--text-tertiary);
+            margin-bottom: 10px;
         }
 
-        /* Progress sections */
+        .stat-value {
+            font-size: 44px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            position: relative;
+        }
+        .stat-value.linkedin {
+            color: var(--linkedin-light);
+            text-shadow: 0 0 40px var(--linkedin-glow);
+        }
+        .stat-value.twitter {
+            color: var(--twitter-light);
+            text-shadow: 0 0 40px var(--twitter-glow);
+        }
+        .stat-value.scheduled {
+            color: var(--infographic-light);
+            text-shadow: 0 0 40px var(--infographic-glow);
+        }
+        .stat-value.total {
+            color: var(--orange-light);
+            text-shadow: 0 0 40px var(--orange-glow);
+        }
+
+        .stat-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+
+        /* ===================================================================
+           PROGRESS SECTION
+           =================================================================== */
         .progress-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
-        @media (max-width: 700px) { .progress-section { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .progress-section { grid-template-columns: 1fr; }
+        }
 
         .progress-card {
-            padding: 24px;
-            border-radius: 16px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            backdrop-filter: blur(20px);
-        }
-        .progress-title {
-            font-size: 15px;
-            font-weight: 700;
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .progress-time {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 6px;
-        }
-        .progress-time.daily { background: rgba(74,222,128,0.12); color: #4ade80; }
-        .progress-time.infographic { background: rgba(192,132,252,0.12); color: #c084fc; }
-
-        .progress-stats {
-            display: flex;
-            justify-content: space-between;
-            margin: 12px 0 8px;
-            font-size: 13px;
-            color: #9ca3af;
-            font-weight: 500;
-        }
-        .progress-bar-wrap {
-            height: 8px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 100px;
+            padding: 28px;
+            border-radius: var(--radius-lg);
+            background: var(--bg-card);
+            backdrop-filter: blur(24px) saturate(1.2);
+            -webkit-backdrop-filter: blur(24px) saturate(1.2);
+            border: 1px solid var(--border-subtle);
+            transition: all var(--transition-smooth);
+            position: relative;
             overflow: hidden;
         }
-        .progress-fill {
-            height: 100%;
-            border-radius: 100px;
-            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-            position: relative;
-        }
-        .progress-fill.daily { background: linear-gradient(90deg, #22c55e, #4ade80); }
-        .progress-fill.infographic { background: linear-gradient(90deg, #8b5cf6, #c084fc); }
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0; right: 0; bottom: 0;
-            width: 40px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
-            border-radius: 0 100px 100px 0;
-        }
-        .progress-dates {
-            font-size: 12px;
-            color: #4b5563;
-            margin-top: 10px;
-            font-weight: 500;
+        .progress-card:hover {
+            border-color: var(--border-medium);
+            box-shadow: var(--shadow-glow);
         }
 
-        /* Section header */
-        .section-header {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 16px;
+        .progress-header {
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
-        .section-header .icon {
-            width: 32px; height: 32px;
-            border-radius: 8px;
+        .progress-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .progress-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        /* Donut chart */
+        .donut-chart {
+            width: 64px;
+            height: 64px;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .donut-chart svg {
+            transform: rotate(-90deg);
+        }
+        .donut-track {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.04);
+            stroke-width: 5;
+        }
+        .donut-fill {
+            fill: none;
+            stroke-width: 5;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .donut-fill.daily { stroke: url(#gradDaily); }
+        .donut-fill.infographic { stroke: url(#gradInfographic); }
+
+        .donut-label {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .progress-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .progress-count strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+        .progress-pct {
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .progress-pct.daily { color: var(--daily-light); }
+        .progress-pct.infographic { color: var(--infographic-light); }
+
+        /* Progress bar */
+        .progress-bar-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: var(--radius-full);
+            position: relative;
+            transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .progress-bar-fill.daily {
+            background: linear-gradient(90deg, var(--daily), var(--daily-light));
+            box-shadow: 0 0 16px rgba(74, 222, 128, 0.2);
+        }
+        .progress-bar-fill.infographic {
+            background: linear-gradient(90deg, var(--infographic), var(--infographic-light));
+            box-shadow: 0 0 16px rgba(192, 132, 252, 0.2);
+        }
+
+        /* Shimmer effect on progress bar */
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.25) 50%,
+                transparent 100%
+            );
+            animation: shimmer 2.5s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        .progress-dates {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 14px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .progress-dates .arrow {
+            color: var(--text-muted);
+            margin: 0 4px;
+        }
+
+        /* ===================================================================
+           SECTION HEADERS
+           =================================================================== */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+        .section-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-tertiary);
+            margin-left: auto;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Calendar */
-        .calendar-section { margin-bottom: 40px; }
+        /* Section divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
+            margin: 36px 0;
+        }
+
+        /* ===================================================================
+           CALENDAR
+           =================================================================== */
+        .calendar-section {
+            margin-bottom: 8px;
+        }
+
         .legend {
             display: flex;
-            gap: 20px;
+            gap: 24px;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: #6b7280;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-tertiary);
             font-weight: 500;
         }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .legend-dot.daily-pub {
+            background: var(--daily-light);
+            box-shadow: 0 0 8px var(--daily-glow);
+        }
+        .legend-dot.daily-sched {
+            background: rgba(74, 222, 128, 0.25);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+        .legend-dot.info-pub {
+            background: var(--infographic-light);
+            box-shadow: 0 0 8px var(--infographic-glow);
+        }
+        .legend-dot.info-sched {
+            background: rgba(192, 132, 252, 0.25);
+            border: 1px solid rgba(192, 132, 252, 0.3);
+        }
 
         .calendar-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 16px;
         }
+        @media (max-width: 1024px) {
+            .calendar-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .calendar-grid { grid-template-columns: 1fr; }
+        }
+
         .month-card {
-            padding: 20px;
-            border-radius: 16px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            backdrop-filter: blur(20px);
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            background: var(--bg-card);
+            backdrop-filter: blur(24px) saturate(1.2);
+            -webkit-backdrop-filter: blur(24px) saturate(1.2);
+            border: 1px solid var(--border-subtle);
+            transition: all var(--transition-smooth);
         }
+        .month-card:hover {
+            border-color: var(--border-medium);
+            box-shadow: var(--shadow-glow);
+        }
+
         .month-name {
-            font-weight: 700;
             font-size: 15px;
-            margin-bottom: 12px;
+            font-weight: 700;
+            color: var(--text-secondary);
             text-align: center;
-            color: #d1d5db;
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+            text-transform: capitalize;
         }
+
         .weekdays {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 2px;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
         .weekday {
             text-align: center;
-            font-size: 11px;
-            color: #4b5563;
-            padding: 4px;
-            font-weight: 600;
+            font-size: 10px;
+            color: var(--text-muted);
+            padding: 4px 0;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
+
         .days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 3px;
         }
+
         .day {
             text-align: center;
             padding: 6px 2px;
             font-size: 13px;
             font-weight: 500;
-            border-radius: 8px;
+            border-radius: 10px;
             position: relative;
-            min-height: 40px;
+            min-height: 44px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: background 0.15s;
-            color: #9ca3af;
+            color: var(--text-tertiary);
+            transition: all var(--transition-fast);
+            cursor: default;
         }
-        .day:hover:not(.empty) { background: rgba(255,255,255,0.05); }
+        .day:not(.empty):hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+        }
         .day.today {
-            background: rgba(99,102,241,0.15);
-            border: 1px solid rgba(99,102,241,0.4);
-            color: #fff;
-            font-weight: 700;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            color: var(--text-primary);
+            font-weight: 800;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
         }
-        .dots { display: flex; gap: 3px; margin-top: 3px; }
-        .dot {
-            width: 7px; height: 7px;
-            border-radius: 50%;
-            transition: transform 0.15s;
+        .day.today::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 2px;
+            border-radius: 1px;
+            background: #818cf8;
+            opacity: 0.7;
         }
-        .day:hover .dot { transform: scale(1.3); }
-        .dot.daily-published { background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,0.4); }
-        .dot.daily-scheduled { background: rgba(74,222,128,0.3); }
-        .dot.infographic-published { background: #c084fc; box-shadow: 0 0 6px rgba(192,132,252,0.4); }
-        .dot.infographic-scheduled { background: rgba(192,132,252,0.3); }
 
-        /* Activity log */
-        .log-section { margin-bottom: 40px; }
+        /* Tooltip */
+        .day[data-tooltip]:not(.empty):hover .day-tooltip {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+        .day-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            padding: 6px 12px;
+            background: rgba(20, 20, 36, 0.95);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all var(--transition-fast);
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+        .day-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: rgba(20, 20, 36, 0.95);
+        }
+
+        .dots {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            transition: all var(--transition-fast);
+        }
+        .day:hover .dot {
+            transform: scale(1.35);
+        }
+
+        .dot.daily-published {
+            background: var(--daily-light);
+            box-shadow: 0 0 8px var(--daily-glow);
+            animation: dotGlow 3s ease-in-out infinite alternate;
+        }
+        .dot.daily-scheduled {
+            background: rgba(74, 222, 128, 0.25);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+        .dot.infographic-published {
+            background: var(--infographic-light);
+            box-shadow: 0 0 8px var(--infographic-glow);
+            animation: dotGlowPurple 3s ease-in-out infinite alternate;
+        }
+        .dot.infographic-scheduled {
+            background: rgba(192, 132, 252, 0.25);
+            border: 1px solid rgba(192, 132, 252, 0.3);
+        }
+
+        @keyframes dotGlow {
+            0% { box-shadow: 0 0 6px rgba(74, 222, 128, 0.25); }
+            100% { box-shadow: 0 0 12px rgba(74, 222, 128, 0.5); }
+        }
+        @keyframes dotGlowPurple {
+            0% { box-shadow: 0 0 6px rgba(192, 132, 252, 0.25); }
+            100% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.5); }
+        }
+
+        /* ===================================================================
+           ACTIVITY LOG
+           =================================================================== */
+        .log-section {
+            margin-bottom: 8px;
+        }
+
         .log-card {
-            border-radius: 16px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            background: var(--bg-card);
+            backdrop-filter: blur(24px) saturate(1.2);
+            -webkit-backdrop-filter: blur(24px) saturate(1.2);
+            border: 1px solid var(--border-subtle);
             overflow: hidden;
         }
+
         .log-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
         }
         .log-table th {
             text-align: left;
-            padding: 14px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            color: #6b7280;
-            font-weight: 600;
-            font-size: 11px;
+            padding: 16px 20px;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.8px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+            background: rgba(255, 255, 255, 0.01);
         }
         .log-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            color: #9ca3af;
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all var(--transition-fast);
         }
-        .log-table tr:hover td { background: rgba(255,255,255,0.02); }
-        .log-table tr:last-child td { border-bottom: none; }
+        .log-table tbody tr {
+            transition: all var(--transition-fast);
+        }
+        .log-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .log-table tbody tr:hover td {
+            color: var(--text-primary);
+        }
+        .log-table tbody tr:last-child td {
+            border-bottom: none;
+        }
 
+        .log-timestamp {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .log-type {
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: capitalize;
+        }
+        .log-image {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+
+        /* Badges */
         .badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 3px 10px;
-            border-radius: 100px;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
             font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            transition: all var(--transition-fast);
         }
-        .badge-ok { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
-        .badge-error { background: rgba(248,113,113,0.1); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
-        .badge-platform {
-            padding: 3px 10px;
-            border-radius: 100px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .badge-linkedin { background: rgba(0,119,181,0.12); color: #60a5fa; border: 1px solid rgba(0,119,181,0.2); }
-        .badge-twitter { background: rgba(29,155,240,0.12); color: #38bdf8; border: 1px solid rgba(29,155,240,0.2); }
 
-        /* Footer */
+        .badge-ok {
+            background: rgba(74, 222, 128, 0.08);
+            color: var(--success);
+            border: 1px solid rgba(74, 222, 128, 0.15);
+        }
+        .badge-ok:hover {
+            background: rgba(74, 222, 128, 0.12);
+        }
+
+        .badge-error {
+            background: rgba(248, 113, 113, 0.08);
+            color: var(--error);
+            border: 1px solid rgba(248, 113, 113, 0.15);
+        }
+
+        .badge-linkedin {
+            background: rgba(0, 119, 181, 0.1);
+            color: var(--linkedin-light);
+            border: 1px solid rgba(0, 119, 181, 0.18);
+        }
+        .badge-twitter {
+            background: rgba(29, 155, 240, 0.1);
+            color: var(--twitter-light);
+            border: 1px solid rgba(29, 155, 240, 0.18);
+        }
+
+        .platform-badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge-mini-icon {
+            width: 12px;
+            height: 12px;
+        }
+
+        /* ===================================================================
+           ERRORS SECTION
+           =================================================================== */
+        .errors-section {
+            margin-bottom: 8px;
+        }
+        .error-card {
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            background: rgba(248, 113, 113, 0.04);
+            border: 1px solid rgba(248, 113, 113, 0.12);
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--error);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .error-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        /* ===================================================================
+           FOOTER
+           =================================================================== */
         .footer {
             text-align: center;
-            padding: 24px;
-            color: #374151;
+            padding: 32px 24px 0;
             font-size: 12px;
+            color: var(--text-muted);
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .footer span { color: #4b5563; }
+        .footer .dot-sep {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+        .footer-link {
+            color: var(--text-tertiary);
+            transition: color var(--transition-fast);
+        }
+        .footer-link:hover {
+            color: var(--text-secondary);
+        }
+
+        /* ===================================================================
+           RESPONSIVE TABLE
+           =================================================================== */
+        .table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; }
+            .header-title { font-size: 26px; }
+            .stat-value { font-size: 36px; }
+            .log-table th, .log-table td { padding: 12px 14px; }
+            .log-table .hide-mobile { display: none; }
+        }
+
+        /* ===================================================================
+           ENTRANCE ANIMATIONS
+           =================================================================== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .delay-1 { animation-delay: 0.05s; }
+        .delay-2 { animation-delay: 0.1s; }
+        .delay-3 { animation-delay: 0.15s; }
+        .delay-4 { animation-delay: 0.2s; }
+        .delay-5 { animation-delay: 0.25s; }
+        .delay-6 { animation-delay: 0.3s; }
+        .delay-7 { animation-delay: 0.35s; }
+        .delay-8 { animation-delay: 0.4s; }
+
+        /* ===================================================================
+           LIVE INDICATOR
+           =================================================================== */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--success);
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            background: rgba(74, 222, 128, 0.06);
+            border: 1px solid rgba(74, 222, 128, 0.12);
+        }
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: livePulse 1.5s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ===================================================================
+           SVG GRADIENT DEFS (hidden)
+           =================================================================== */
+        .svg-defs {
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <h1>Posting Dashboard</h1>
-                <p class="subtitle">LinkedIn + Twitter automatizace &bull; {{ today }}</p>
+    <!-- Background layers -->
+    <div class="aurora-bg"></div>
+    <div class="dot-pattern"></div>
+    <div class="noise-overlay"></div>
+
+    <!-- SVG Gradient definitions -->
+    <svg class="svg-defs" aria-hidden="true">
+        <defs>
+            <linearGradient id="gradDaily" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#22c55e"/>
+                <stop offset="100%" stop-color="#4ade80"/>
+            </linearGradient>
+            <linearGradient id="gradInfographic" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#8b5cf6"/>
+                <stop offset="100%" stop-color="#c084fc"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="dashboard-container">
+
+        <!-- ============================================================
+             HEADER
+             ============================================================ -->
+        <header class="header animate-in">
+            <div>
+                <div class="header-brand">
+                    <div class="brand-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#brandGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <defs>
+                                <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#c084fc"/>
+                                    <stop offset="100%" stop-color="#60a5fa"/>
+                                </linearGradient>
+                            </defs>
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="header-title">Posting Dashboard</h1>
+                        <p class="header-subtitle">
+                            LinkedIn + Twitter automatizace
+                            <span class="separator"></span>
+                            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">{{ today }}</span>
+                            <span class="separator"></span>
+                            <span class="live-indicator"><span class="live-dot"></span>Live</span>
+                        </p>
+                    </div>
+                </div>
             </div>
             <div class="status-bar">
                 <div class="status-pill">
                     <div class="pulse-dot {% if errors %}red{% else %}green{% endif %}"></div>
-                    {% if errors %}{{ errors|length }} error(s){% else %}Vse OK{% endif %}
+                    {% if errors %}{{ errors|length }} chyb{% else %}Vse OK{% endif %}
                 </div>
                 <div class="status-pill">
-                    9:00 Daily
-                    <span class="badge badge-ok">Active</span>
+                    <span class="time-badge daily">9:00</span>
+                    Daily
                 </div>
                 <div class="status-pill">
-                    16:00 Infographic
-                    <span class="badge badge-ok">Active</span>
+                    <span class="time-badge infographic">16:00</span>
+                    Infographic
                 </div>
             </div>
-        </div>
+        </header>
 
-        <!-- Stats -->
+        <!-- ============================================================
+             STATS GRID
+             ============================================================ -->
         <div class="stats-grid">
-            <div class="stat-card linkedin">
-                <div class="stat-icon linkedin">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#60a5fa"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            <div class="stat-card linkedin animate-in delay-1">
+                <div class="stat-card-inner">
+                    <div class="stat-icon-wrap linkedin">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#60a5fa">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                    </div>
+                    <div class="stat-label">LinkedIn posty</div>
+                    <div class="stat-value linkedin">{{ total_linkedin }}</div>
+                    <div class="stat-sub">publikovano celkem</div>
                 </div>
-                <div class="stat-label">LinkedIn posty</div>
-                <div class="stat-value linkedin">{{ total_linkedin }}</div>
-                <div class="stat-sub">publikovano celkem</div>
             </div>
-            <div class="stat-card twitter">
-                <div class="stat-icon twitter">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#38bdf8"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+
+            <div class="stat-card twitter animate-in delay-2">
+                <div class="stat-card-inner">
+                    <div class="stat-icon-wrap twitter">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#38bdf8">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </div>
+                    <div class="stat-label">Twitter posty</div>
+                    <div class="stat-value twitter">{{ total_twitter }}</div>
+                    <div class="stat-sub">publikovano celkem</div>
                 </div>
-                <div class="stat-label">Twitter posty</div>
-                <div class="stat-value twitter">{{ total_twitter }}</div>
-                <div class="stat-sub">publikovano celkem</div>
             </div>
-            <div class="stat-card scheduled">
-                <div class="stat-icon scheduled">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+
+            <div class="stat-card scheduled animate-in delay-3">
+                <div class="stat-card-inner">
+                    <div class="stat-icon-wrap scheduled">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <div class="stat-label">Naplanovano</div>
+                    <div class="stat-value scheduled">{{ total_scheduled }}</div>
+                    <div class="stat-sub">zbyvajicich postu</div>
                 </div>
-                <div class="stat-label">Naplanovano</div>
-                <div class="stat-value scheduled">{{ total_scheduled }}</div>
-                <div class="stat-sub">zbyvajicich postu</div>
             </div>
-            <div class="stat-card total">
-                <div class="stat-icon total">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+
+            <div class="stat-card total animate-in delay-4">
+                <div class="stat-card-inner">
+                    <div class="stat-icon-wrap total">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div class="stat-label">Celkem obsahu</div>
+                    <div class="stat-value total">{{ daily.total + infographic.total }}</div>
+                    <div class="stat-sub">{{ daily.total }} daily + {{ infographic.total }} infographic</div>
                 </div>
-                <div class="stat-label">Celkem obsahu</div>
-                <div class="stat-value total">{{ daily.total + infographic.total }}</div>
-                <div class="stat-sub">{{ daily.total }} daily + {{ infographic.total }} infographic</div>
             </div>
         </div>
 
-        <!-- Progress -->
+        <!-- ============================================================
+             PROGRESS CARDS
+             ============================================================ -->
         <div class="progress-section">
-            <div class="progress-card">
-                <div class="progress-title">
-                    Daily Posts
-                    <span class="progress-time daily">9:00 CET</span>
+            {% set daily_pct = ((daily.published / daily.total) * 100)|round|int if daily.total > 0 else 0 %}
+            {% set info_pct = ((infographic.published / infographic.total) * 100)|round|int if infographic.total > 0 else 0 %}
+
+            <div class="progress-card animate-in delay-5">
+                <div class="progress-header">
+                    <div class="progress-title-group">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M9 12l2 2 4-4"/>
+                        </svg>
+                        <span class="progress-title">Daily Posts</span>
+                        <span class="time-badge daily">9:00 CET</span>
+                    </div>
+                    <div class="donut-chart">
+                        <svg width="64" height="64" viewBox="0 0 64 64">
+                            <circle class="donut-track" cx="32" cy="32" r="26"/>
+                            <circle class="donut-fill daily" cx="32" cy="32" r="26"
+                                    stroke-dasharray="{{ (2 * 3.14159 * 26) }}"
+                                    stroke-dashoffset="{{ (2 * 3.14159 * 26) * (1 - daily_pct / 100) }}"/>
+                        </svg>
+                        <div class="donut-label">{{ daily_pct }}%</div>
+                    </div>
                 </div>
-                <div class="progress-stats">
-                    <span>{{ daily.published }}/{{ daily.total }} publikovano</span>
-                    <span>{% if daily.total > 0 %}{{ ((daily.published / daily.total) * 100)|round|int }}%{% else %}0%{% endif %}</span>
+                <div class="progress-meta">
+                    <span class="progress-count"><strong>{{ daily.published }}</strong> / {{ daily.total }} publikovano</span>
+                    <span class="progress-pct daily">{{ daily_pct }}%</span>
                 </div>
-                <div class="progress-bar-wrap">
-                    <div class="progress-fill daily" style="width: {% if daily.total > 0 %}{{ (daily.published / daily.total * 100)|round }}{% else %}0{% endif %}%;"></div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill daily" style="width: {{ daily_pct }}%;"></div>
                 </div>
+                {% if daily.start_date %}
                 <div class="progress-dates">
-                    {% if daily.start_date %}{{ daily.start_date }} &rarr; {{ daily.end_date }}{% endif %}
+                    <span>{{ daily.start_date }}</span>
+                    <span class="arrow">&rarr;</span>
+                    <span>{{ daily.end_date }}</span>
                 </div>
+                {% endif %}
             </div>
-            <div class="progress-card">
-                <div class="progress-title">
-                    Infographic Posts
-                    <span class="progress-time infographic">16:00 CET</span>
+
+            <div class="progress-card animate-in delay-6">
+                <div class="progress-header">
+                    <div class="progress-title-group">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round">
+                            <rect x="2" y="2" width="20" height="20" rx="2"/>
+                            <path d="M7 2v20"/>
+                            <path d="M17 2v20"/>
+                            <path d="M2 12h20"/>
+                            <path d="M2 7h5"/>
+                            <path d="M2 17h5"/>
+                            <path d="M17 7h5"/>
+                            <path d="M17 17h5"/>
+                        </svg>
+                        <span class="progress-title">Infographic Posts</span>
+                        <span class="time-badge infographic">16:00 CET</span>
+                    </div>
+                    <div class="donut-chart">
+                        <svg width="64" height="64" viewBox="0 0 64 64">
+                            <circle class="donut-track" cx="32" cy="32" r="26"/>
+                            <circle class="donut-fill infographic" cx="32" cy="32" r="26"
+                                    stroke-dasharray="{{ (2 * 3.14159 * 26) }}"
+                                    stroke-dashoffset="{{ (2 * 3.14159 * 26) * (1 - info_pct / 100) }}"/>
+                        </svg>
+                        <div class="donut-label">{{ info_pct }}%</div>
+                    </div>
                 </div>
-                <div class="progress-stats">
-                    <span>{{ infographic.published }}/{{ infographic.total }} publikovano</span>
-                    <span>{% if infographic.total > 0 %}{{ ((infographic.published / infographic.total) * 100)|round|int }}%{% else %}0%{% endif %}</span>
+                <div class="progress-meta">
+                    <span class="progress-count"><strong>{{ infographic.published }}</strong> / {{ infographic.total }} publikovano</span>
+                    <span class="progress-pct infographic">{{ info_pct }}%</span>
                 </div>
-                <div class="progress-bar-wrap">
-                    <div class="progress-fill infographic" style="width: {% if infographic.total > 0 %}{{ (infographic.published / infographic.total * 100)|round }}{% else %}0{% endif %}%;"></div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill infographic" style="width: {{ info_pct }}%;"></div>
                 </div>
+                {% if infographic.start_date %}
                 <div class="progress-dates">
-                    {% if infographic.start_date %}{{ infographic.start_date }} &rarr; {{ infographic.end_date }}{% endif %}
+                    <span>{{ infographic.start_date }}</span>
+                    <span class="arrow">&rarr;</span>
+                    <span>{{ infographic.end_date }}</span>
                 </div>
+                {% endif %}
             </div>
         </div>
 
-        <!-- Calendar -->
-        <div class="calendar-section">
+        <div class="section-divider"></div>
+
+        <!-- ============================================================
+             CALENDAR (only 3 months)
+             ============================================================ -->
+        <div class="calendar-section animate-in delay-7">
             <div class="section-header">
-                <div class="icon" style="background: rgba(99,102,241,0.12);">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <div class="section-icon" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.15);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
                 </div>
-                Kalendar
+                <span class="section-title">Kalendar</span>
+                <span class="section-badge">3 mesice</span>
             </div>
+
             <div class="legend">
-                <div class="legend-item"><div class="legend-dot" style="background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,0.4);"></div> Daily (publikovano)</div>
-                <div class="legend-item"><div class="legend-dot" style="background: rgba(74,222,128,0.3);"></div> Daily (planovano)</div>
-                <div class="legend-item"><div class="legend-dot" style="background: #c084fc; box-shadow: 0 0 6px rgba(192,132,252,0.4);"></div> Infographic (publikovano)</div>
-                <div class="legend-item"><div class="legend-dot" style="background: rgba(192,132,252,0.3);"></div> Infographic (planovano)</div>
+                <div class="legend-item">
+                    <div class="legend-dot daily-pub"></div>
+                    Daily (publikovano)
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot daily-sched"></div>
+                    Daily (planovano)
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot info-pub"></div>
+                    Infographic (publikovano)
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot info-sched"></div>
+                    Infographic (planovano)
+                </div>
             </div>
+
             <div class="calendar-grid">
-                {% for month in calendar %}
+                {% for month in calendar[:3] %}
                 <div class="month-card">
                     <div class="month-name">{{ month.name }}</div>
                     <div class="weekdays">
@@ -534,7 +1488,7 @@
                         {% for week in month.weeks %}
                             {% for day in week %}
                                 {% if day %}
-                                <div class="day {% if day.is_today %}today{% endif %}">
+                                <div class="day {% if day.is_today %}today{% endif %}" {% if day.has_daily or day.has_infographic %}data-tooltip="1"{% endif %}>
                                     {{ day.day }}
                                     {% if day.has_daily or day.has_infographic %}
                                     <div class="dots">
@@ -544,6 +1498,11 @@
                                         {% if day.has_infographic %}
                                         <div class="dot infographic-{{ day.infographic_status }}"></div>
                                         {% endif %}
+                                    </div>
+                                    <div class="day-tooltip">
+                                        {% if day.has_daily %}Daily: {{ day.daily_status }}{% endif %}
+                                        {% if day.has_daily and day.has_infographic %} &bull; {% endif %}
+                                        {% if day.has_infographic %}Info: {{ day.infographic_status }}{% endif %}
                                     </div>
                                     {% endif %}
                                 </div>
@@ -558,56 +1517,102 @@
             </div>
         </div>
 
-        <!-- Activity Log -->
+        <div class="section-divider"></div>
+
+        <!-- ============================================================
+             ACTIVITY LOG
+             ============================================================ -->
         {% if log %}
-        <div class="log-section">
+        <div class="log-section animate-in delay-8">
             <div class="section-header">
-                <div class="icon" style="background: rgba(52,211,153,0.12);">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <div class="section-icon" style="background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.15);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
                 </div>
-                Posledni aktivita
+                <span class="section-title">Posledni aktivita</span>
+                <span class="section-badge">{{ log|length }} zaznamu</span>
             </div>
+
             <div class="log-card">
-                <table class="log-table">
-                    <thead>
-                        <tr>
-                            <th>Cas</th>
-                            <th>Typ</th>
-                            <th>Obrazek</th>
-                            <th>Platformy</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entry in log|reverse %}
-                        <tr>
-                            <td style="color: #d1d5db; font-weight: 500;">{{ entry.timestamp[:16] if entry.timestamp else '-' }}</td>
-                            <td>{{ entry.platform|default('daily') }}</td>
-                            <td style="color: #9ca3af;">{{ entry.image|default('-') }}</td>
-                            <td>
-                                {% if entry.linkedin_id %}<span class="badge badge-linkedin">LinkedIn</span>{% endif %}
-                                {% if entry.twitter_id %}<span class="badge badge-twitter" style="margin-left: 4px;">Twitter</span>{% endif %}
-                                {% if not entry.linkedin_id and not entry.twitter_id %}-{% endif %}
-                            </td>
-                            <td>
-                                {% if entry.status == 'published' %}
-                                <span class="badge badge-ok">Published</span>
-                                {% else %}
-                                <span class="badge badge-error">Error</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="table-wrap">
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th>Cas</th>
+                                <th>Typ</th>
+                                <th class="hide-mobile">Obrazek</th>
+                                <th>Platformy</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in log|reverse %}
+                            <tr>
+                                <td>
+                                    <span class="log-timestamp">{{ entry.timestamp[:16] if entry.timestamp else '-' }}</span>
+                                </td>
+                                <td>
+                                    <span class="log-type">{{ entry.platform|default('daily') }}</span>
+                                </td>
+                                <td class="hide-mobile">
+                                    <span class="log-image">{{ entry.image|default('-') }}</span>
+                                </td>
+                                <td>
+                                    <div class="platform-badges">
+                                        {% if entry.linkedin_id %}
+                                        <span class="badge badge-linkedin">
+                                            <svg class="badge-mini-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                                            LI
+                                        </span>
+                                        {% endif %}
+                                        {% if entry.twitter_id %}
+                                        <span class="badge badge-twitter">
+                                            <svg class="badge-mini-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                            X
+                                        </span>
+                                        {% endif %}
+                                        {% if not entry.linkedin_id and not entry.twitter_id %}
+                                        <span style="color: var(--text-muted);">-</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if entry.status == 'published' %}
+                                    <span class="badge badge-ok">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        Published
+                                    </span>
+                                    {% else %}
+                                    <span class="badge badge-error">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                        Error
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         {% endif %}
 
+        <!-- ============================================================
+             FOOTER
+             ============================================================ -->
         <div class="footer">
-            Auto-refresh kazdych 60s &bull; <span>Powered by Railway</span>
+            <span>Auto-refresh kazdych 60s</span>
+            <span class="dot-sep"></span>
+            <span class="footer-link">Powered by Railway</span>
         </div>
+
     </div>
-    <script>setTimeout(() => location.reload(), 60000);</script>
+
+    <script>
+        // Auto-refresh every 60 seconds (backup to meta refresh)
+        setTimeout(function() { location.reload(); }, 60000);
+    </script>
 </body>
 </html>
