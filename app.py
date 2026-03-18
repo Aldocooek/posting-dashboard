@@ -10,14 +10,96 @@ Automations:
 
 import json
 import os
+import time
+import threading
 from datetime import date, timedelta
 from pathlib import Path
 from flask import Flask, render_template, jsonify, request
+
+try:
+    import requests as http_requests
+    import tweepy
+    SOCIAL_API_AVAILABLE = True
+except ImportError:
+    SOCIAL_API_AVAILABLE = False
 
 app = Flask(__name__)
 
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "data"
+
+# --- Social media profile cache (refresh every 30 min) ---
+_social_cache = {"data": None, "ts": 0}
+_CACHE_TTL = 1800  # 30 minutes
+
+
+def fetch_social_profiles():
+    """Fetch live profile data from Twitter + LinkedIn APIs."""
+    profiles = {}
+
+    # Twitter / X
+    tw_api_key = os.environ.get("TWITTER_API_KEY")
+    tw_api_secret = os.environ.get("TWITTER_API_SECRET")
+    tw_access_token = os.environ.get("TWITTER_ACCESS_TOKEN")
+    tw_access_secret = os.environ.get("TWITTER_ACCESS_SECRET")
+
+    if SOCIAL_API_AVAILABLE and tw_api_key and tw_access_token:
+        try:
+            tw = tweepy.Client(
+                consumer_key=tw_api_key, consumer_secret=tw_api_secret,
+                access_token=tw_access_token, access_token_secret=tw_access_secret,
+            )
+            me = tw.get_me(user_fields=["public_metrics", "description", "profile_image_url", "username", "created_at"])
+            if me and me.data:
+                pm = me.data.public_metrics
+                profiles["twitter"] = {
+                    "name": me.data.name,
+                    "username": f"@{me.data.username}",
+                    "url": f"https://x.com/{me.data.username}",
+                    "avatar": me.data.profile_image_url.replace("_normal", "_400x400") if me.data.profile_image_url else None,
+                    "bio": me.data.description,
+                    "followers": pm.get("followers_count", 0),
+                    "following": pm.get("following_count", 0),
+                    "tweets": pm.get("tweet_count", 0),
+                    "listed": pm.get("listed_count", 0),
+                }
+        except Exception as e:
+            print(f"Twitter API error: {e}")
+
+    # LinkedIn
+    li_token = os.environ.get("LINKEDIN_ACCESS_TOKEN")
+    if SOCIAL_API_AVAILABLE and li_token:
+        try:
+            r = http_requests.get(
+                "https://api.linkedin.com/v2/userinfo",
+                headers={"Authorization": f"Bearer {li_token}"},
+                timeout=10,
+            )
+            if r.status_code == 200:
+                d = r.json()
+                profiles["linkedin"] = {
+                    "name": d.get("name", ""),
+                    "url": f"https://www.linkedin.com/in/{d.get('sub', '')}",
+                    "avatar": d.get("picture", ""),
+                    "email": d.get("email", ""),
+                }
+        except Exception as e:
+            print(f"LinkedIn API error: {e}")
+
+    return profiles
+
+
+def get_social_profiles():
+    """Get cached social profiles (refreshes every 30 min)."""
+    now = time.time()
+    if _social_cache["data"] is None or (now - _social_cache["ts"]) > _CACHE_TTL:
+        try:
+            _social_cache["data"] = fetch_social_profiles()
+            _social_cache["ts"] = now
+        except Exception:
+            if _social_cache["data"] is None:
+                _social_cache["data"] = {}
+    return _social_cache["data"]
 
 # --- Schedule configs ---
 DAILY_START = date(2026, 3, 15)
@@ -178,6 +260,8 @@ def dashboard():
     total_sched = daily["remaining"] + infographic["remaining"] + evening["remaining"]
     total_all = daily["total"] + infographic["total"] + evening["total"]
 
+    social = get_social_profiles()
+
     return render_template(
         "dashboard.html",
         today=today.isoformat(),
@@ -191,6 +275,7 @@ def dashboard():
         total_twitter=total_pub,
         total_scheduled=total_sched,
         total_all=total_all,
+        social=social,
     )
 
 
@@ -208,6 +293,11 @@ def api_status():
         "total_published": daily["published"] + infographic["published"] + evening["published"],
         "total_scheduled": daily["remaining"] + infographic["remaining"] + evening["remaining"],
     })
+
+
+@app.route("/api/social")
+def api_social():
+    return jsonify(get_social_profiles())
 
 
 @app.route("/api/log", methods=["POST"])
