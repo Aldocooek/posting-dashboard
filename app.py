@@ -79,7 +79,7 @@ def fetch_social_profiles():
                 d = r.json()
                 profiles["linkedin"] = {
                     "name": d.get("name", ""),
-                    "url": f"https://www.linkedin.com/in/{d.get('sub', '')}",
+                    "url": "https://www.linkedin.com/in/luk%C3%A1%C5%A1-dlouh%C3%BD-bab026257/",
                     "avatar": d.get("picture", ""),
                     "email": d.get("email", ""),
                 }
