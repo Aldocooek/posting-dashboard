@@ -3,9 +3,11 @@
 Social Autopilot Dashboard — status overview for all 3 automations.
 
 Automations:
-  1. Daily Posts (09:00 CET) — image + text → LinkedIn + Twitter
-  2. Infographics (16:00 CET) — image + text → LinkedIn + Twitter
-  3. Evening Posts (20:00 CET) — text only → LinkedIn + Twitter
+  1. Daily Posts (09:00 CET) — image + text → LinkedIn + Twitter + Threads
+  2. Infographics (16:00 CET) — image + text → LinkedIn + Twitter + Threads
+  3. Evening Posts (20:00 CET) — text only → LinkedIn + Twitter + Threads
+
+Threads posting starts 2026-03-29.
 """
 
 import json
@@ -85,6 +87,32 @@ def fetch_social_profiles():
                 }
         except Exception as e:
             print(f"LinkedIn API error: {e}")
+
+    # Threads
+    threads_token = os.environ.get("THREADS_ACCESS_TOKEN")
+    threads_user_id = os.environ.get("THREADS_USER_ID")
+    if SOCIAL_API_AVAILABLE and threads_token and threads_user_id:
+        try:
+            r = http_requests.get(
+                f"https://graph.threads.net/v1.0/{threads_user_id}",
+                params={
+                    "fields": "id,username,name,threads_profile_picture_url,threads_biography",
+                    "access_token": threads_token,
+                },
+                timeout=10,
+            )
+            if r.status_code == 200:
+                d = r.json()
+                profiles["threads"] = {
+                    "name": d.get("name", ""),
+                    "username": f"@{d.get('username', '')}",
+                    "url": f"https://www.threads.com/@{d.get('username', '')}",
+                    "avatar": d.get("threads_profile_picture_url", ""),
+                    "bio": d.get("threads_biography", ""),
+                    "user_id": d.get("id", ""),
+                }
+        except Exception as e:
+            print(f"Threads API error: {e}")
 
     return profiles
 
