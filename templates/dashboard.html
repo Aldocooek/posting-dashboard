@@ -1307,8 +1307,16 @@
         </div>
         <div class="profile-stats">
             <div class="profile-stat">
-                <div class="profile-stat-value" style="color:var(--threads-accent)">Starts</div>
-                <div class="profile-stat-label">Mar 29</div>
+                <div class="profile-stat-value">{{ social.threads.followers_count|default(0) }}</div>
+                <div class="profile-stat-label">Followers</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-value">{{ social.threads.likes|default(0) }}</div>
+                <div class="profile-stat-label">Likes</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-value">{{ social.threads.replies|default(0) }}</div>
+                <div class="profile-stat-label">Replies</div>
             </div>
         </div>
     </div>

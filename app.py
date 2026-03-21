@@ -103,7 +103,7 @@ def fetch_social_profiles():
             )
             if r.status_code == 200:
                 d = r.json()
-                profiles["threads"] = {
+                threads_data = {
                     "name": d.get("name", ""),
                     "username": f"@{d.get('username', '')}",
                     "url": f"https://www.threads.com/@{d.get('username', '')}",
@@ -111,6 +111,23 @@ def fetch_social_profiles():
                     "bio": d.get("threads_biography", ""),
                     "user_id": d.get("id", ""),
                 }
+                # Fetch insights (followers, likes, etc.)
+                try:
+                    r2 = http_requests.get(
+                        f"https://graph.threads.net/v1.0/{threads_user_id}/threads_insights",
+                        params={
+                            "metric": "followers_count,likes,replies,reposts,quotes",
+                            "access_token": threads_token,
+                        },
+                        timeout=10,
+                    )
+                    if r2.status_code == 200:
+                        for m in r2.json().get("data", []):
+                            val = m.get("total_value", {}).get("value", 0)
+                            threads_data[m["name"]] = val if val is not None else 0
+                except Exception:
+                    pass
+                profiles["threads"] = threads_data
         except Exception as e:
             print(f"Threads API error: {e}")
 
