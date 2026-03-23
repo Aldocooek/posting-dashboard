@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
 """
-Social Autopilot Dashboard — status overview for all 3 automations.
+Social Autopilot Dashboard — status overview for infographic automation.
 
-Automations:
-  1. Daily Posts (09:00 CET) — image + text → LinkedIn + Twitter + Threads
-  2. Infographics (16:00 CET) — image + text → LinkedIn + Twitter + Threads
-  3. Evening Posts (20:00 CET) — text only → LinkedIn + Twitter + Threads
-
-Threads posting starts 2026-03-29.
+Automation:
+  Infographics (16:00 CET) — image + text → LinkedIn + Twitter + Threads
 """
 
 import json
 import os
 import time
-import threading
 from datetime import date, timedelta
 from pathlib import Path
 from flask import Flask, render_template, jsonify, request
@@ -36,7 +31,7 @@ _CACHE_TTL = 1800  # 30 minutes
 
 
 def fetch_social_profiles():
-    """Fetch live profile data from Twitter + LinkedIn APIs."""
+    """Fetch live profile data from Twitter + LinkedIn + Threads APIs."""
     profiles = {}
 
     # Twitter / X
@@ -51,15 +46,15 @@ def fetch_social_profiles():
                 consumer_key=tw_api_key, consumer_secret=tw_api_secret,
                 access_token=tw_access_token, access_token_secret=tw_access_secret,
             )
-            me = tw.get_me(user_fields=["public_metrics", "description", "profile_image_url", "username", "created_at"])
+            me = tw.get_me(user_fields=["public_metrics", "description", "profile_image_url"])
             if me and me.data:
-                pm = me.data.public_metrics
+                pm = me.data.public_metrics or {}
                 profiles["twitter"] = {
                     "name": me.data.name,
                     "username": f"@{me.data.username}",
                     "url": f"https://x.com/{me.data.username}",
-                    "avatar": me.data.profile_image_url.replace("_normal", "_400x400") if me.data.profile_image_url else None,
-                    "bio": me.data.description,
+                    "avatar": (me.data.profile_image_url or "").replace("_normal", "_400x400"),
+                    "bio": me.data.description or "",
                     "followers": pm.get("followers_count", 0),
                     "following": pm.get("following_count", 0),
                     "tweets": pm.get("tweet_count", 0),
@@ -146,10 +141,9 @@ def get_social_profiles():
                 _social_cache["data"] = {}
     return _social_cache["data"]
 
-# --- Schedule configs ---
-DAILY_START = date(2026, 3, 15)
+
+# --- Schedule config ---
 INFOGRAPHIC_START = date(2026, 3, 15)
-EVENING_START = date(2026, 3, 17)  # Day 3 series started today
 
 
 def load_json(filepath):
@@ -160,21 +154,9 @@ def load_json(filepath):
         return None
 
 
-def get_daily_posts():
-    data = load_json(DATA_DIR / "daily_posts.json")
-    return data["posts"] if data else []
-
-
 def get_infographic_posts():
     data = load_json(DATA_DIR / "infographic_posts.json")
     return data["posts"] if data else []
-
-
-def get_evening_posts():
-    data = load_json(DATA_DIR / "evening_posts.json")
-    if data:
-        return data["posts"] if "posts" in data else data
-    return []
 
 
 def get_post_log():
@@ -187,8 +169,8 @@ def save_post_log(log):
         json.dump(log, f, indent=2, ensure_ascii=False)
 
 
-def get_series_status(posts, start_date, today, platform_name):
-    """Generic status calculator for any post series."""
+def get_series_status(posts, start_date, today):
+    """Status calculator for infographic series."""
     total = len(posts)
     if not posts:
         return {"total": 0, "published": 0, "remaining": 0, "schedule": []}
@@ -207,7 +189,6 @@ def get_series_status(posts, start_date, today, platform_name):
             "image": post.get("image", None),
             "text": text[:100] + "..." if len(text) > 100 else text,
             "status": "published" if post_date <= today else "scheduled",
-            "platform": platform_name,
         })
 
     return {
@@ -220,14 +201,12 @@ def get_series_status(posts, start_date, today, platform_name):
     }
 
 
-def build_calendar(today, daily_schedule, infographic_schedule, evening_schedule, months_ahead=3):
-    """Build calendar data for template — now includes evening posts."""
+def build_calendar(today, infographic_schedule, months_ahead=3):
+    """Build calendar data for template."""
     cal_start = today.replace(day=1)
     cal_end = today.replace(day=1) + timedelta(days=months_ahead * 31)
 
-    daily_by_date = {s["date"]: s for s in daily_schedule}
     infographic_by_date = {s["date"]: s for s in infographic_schedule}
-    evening_by_date = {s["date"]: s for s in evening_schedule}
 
     months = []
     current = cal_start
@@ -246,20 +225,14 @@ def build_calendar(today, daily_schedule, infographic_schedule, evening_schedule
 
         while day.month == current.month:
             d = day.isoformat()
-            has_daily = d in daily_by_date
             has_infographic = d in infographic_by_date
-            has_evening = d in evening_by_date
 
             week.append({
                 "day": day.day,
                 "date": d,
                 "is_today": day == today,
-                "has_daily": has_daily,
                 "has_infographic": has_infographic,
-                "has_evening": has_evening,
-                "daily_status": daily_by_date[d]["status"] if has_daily else None,
                 "infographic_status": infographic_by_date[d]["status"] if has_infographic else None,
-                "evening_status": evening_by_date[d]["status"] if has_evening else None,
             })
 
             if len(week) == 7:
@@ -286,40 +259,29 @@ def build_calendar(today, daily_schedule, infographic_schedule, evening_schedule
 def dashboard():
     today = date.today()
 
-    daily = get_series_status(get_daily_posts(), DAILY_START, today, "daily")
-    infographic = get_series_status(get_infographic_posts(), INFOGRAPHIC_START, today, "infographic")
-    evening = get_series_status(get_evening_posts(), EVENING_START, today, "evening")
+    infographic = get_series_status(get_infographic_posts(), INFOGRAPHIC_START, today)
     log = get_post_log()
 
     calendar = build_calendar(
         today,
-        daily.get("schedule", []),
         infographic.get("schedule", []),
-        evening.get("schedule", []),
         months_ahead=3,
     )
 
     errors = [e for e in log if e.get("status") == "error"][-5:]
-
-    total_pub = daily["published"] + infographic["published"] + evening["published"]
-    total_sched = daily["remaining"] + infographic["remaining"] + evening["remaining"]
-    total_all = daily["total"] + infographic["total"] + evening["total"]
-
     social = get_social_profiles()
 
     return render_template(
         "dashboard.html",
         today=today.isoformat(),
-        daily=daily,
         infographic=infographic,
-        evening=evening,
         calendar=calendar,
         log=log[-30:],
         errors=errors,
-        total_linkedin=total_pub,
-        total_twitter=total_pub,
-        total_scheduled=total_sched,
-        total_all=total_all,
+        total_linkedin=infographic["published"],
+        total_twitter=infographic["published"],
+        total_scheduled=infographic["remaining"],
+        total_all=infographic["total"],
         social=social,
     )
 
@@ -327,16 +289,18 @@ def dashboard():
 @app.route("/api/status")
 def api_status():
     today = date.today()
-    daily = get_series_status(get_daily_posts(), DAILY_START, today, "daily")
-    infographic = get_series_status(get_infographic_posts(), INFOGRAPHIC_START, today, "infographic")
-    evening = get_series_status(get_evening_posts(), EVENING_START, today, "evening")
+    infographic = get_series_status(get_infographic_posts(), INFOGRAPHIC_START, today)
     return jsonify({
         "date": today.isoformat(),
-        "daily": {k: v for k, v in daily.items() if k != "schedule"},
-        "infographic": {k: v for k, v in infographic.items() if k != "schedule"},
-        "evening": {k: v for k, v in evening.items() if k != "schedule"},
-        "total_published": daily["published"] + infographic["published"] + evening["published"],
-        "total_scheduled": daily["remaining"] + infographic["remaining"] + evening["remaining"],
+        "infographic": {
+            "total": infographic["total"],
+            "published": infographic["published"],
+            "remaining": infographic["remaining"],
+            "start_date": infographic.get("start_date"),
+            "end_date": infographic.get("end_date"),
+        },
+        "total_published": infographic["published"],
+        "total_scheduled": infographic["total"],
     })
 
 
@@ -347,15 +311,14 @@ def api_social():
 
 @app.route("/api/log", methods=["POST"])
 def api_log():
-    """Endpoint for automations to report post status."""
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "No data"}), 400
-    log = get_post_log()
-    log.append(data)
-    save_post_log(log)
-    return jsonify({"ok": True})
+    entry = request.get_json(silent=True)
+    if entry:
+        log = get_post_log()
+        log.append(entry)
+        save_post_log(log)
+        return jsonify({"ok": True})
+    return jsonify({"error": "no data"}), 400
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
