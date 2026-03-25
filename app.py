@@ -274,6 +274,7 @@ def dashboard():
     return render_template(
         "dashboard.html",
         today=today.isoformat(),
+        paused=True,
         infographic=infographic,
         calendar=calendar,
         log=log[-30:],

@@ -1225,7 +1225,7 @@
         </div>
         <div>
             <h1>Social Autopilot</h1>
-            <p class="subtitle">LinkedIn + Twitter + Threads &mdash; 3 Daily Automations</p>
+            <p class="subtitle">{% if paused %}<span style="color:#ef4444;font-weight:700">ALL AUTOMATIONS PAUSED</span>{% else %}LinkedIn + Twitter + Threads{% endif %}</p>
         </div>
     </div>
     <div class="header-meta">
@@ -1340,13 +1340,6 @@
         <div class="stat-sub">tweets published</div>
         <svg class="sparkline" viewBox="0 0 100 32" preserveAspectRatio="none"><path d="M0,24 Q15,18 25,26 T50,12 T75,18 T100,8 V32 H0Z" fill="url(#sparkTwitter)"/></svg>
     </div>
-    <div class="stat-card eve" data-reveal="up">
-        <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></div>
-        <div class="stat-label">Evening</div>
-        <div class="stat-value" data-count="{{ evening.published }}">0</div>
-        <div class="stat-sub">of {{ evening.total }} text posts</div>
-        <svg class="sparkline" viewBox="0 0 100 32" preserveAspectRatio="none"><path d="M0,30 Q20,22 30,26 T60,14 T80,22 T100,10 V32 H0Z" fill="url(#sparkEvening)"/></svg>
-    </div>
     <div class="stat-card sched" data-reveal="up">
         <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
         <div class="stat-label">Scheduled</div>
@@ -1364,42 +1357,15 @@
 </section>
 
 <!-- PROGRESS CARDS -->
-{% set daily_pct = ((daily.published / daily.total * 100)|round|int) if daily.total > 0 else 0 %}
 {% set info_pct = ((infographic.published / infographic.total * 100)|round|int) if infographic.total > 0 else 0 %}
-{% set eve_pct = ((evening.published / evening.total * 100)|round|int) if evening.total > 0 else 0 %}
 {% set C = 2 * 3.14159 * 30 %}
 
 <div class="section-divider" data-reveal="fade" data-reveal-speed="slow"></div>
 <section class="progress-grid" aria-label="Progress" data-reveal-stagger>
-    <div class="progress-card daily-card" data-reveal="up">
-        <div class="progress-header">
-            <div class="progress-tag"><div class="progress-dot daily"></div><span class="progress-name">Daily Posts</span></div>
-            <span class="progress-time">09:00 CET</span>
-        </div>
-        <div class="donut-row">
-            <div class="donut-wrap">
-                <svg width="80" height="80" viewBox="0 0 80 80">
-                    <circle class="donut-track" cx="40" cy="40" r="30"/>
-                    <circle class="donut-fill" stroke="url(#gDaily)" cx="40" cy="40" r="30"
-                        stroke-dasharray="{{ C }}" stroke-dashoffset="{{ C - (C * daily_pct / 100) }}"
-                        style="--donut-glow: var(--daily-glow);"/>
-                </svg>
-                <span class="donut-pct">{{ daily_pct }}%</span>
-            </div>
-            <div class="donut-info">
-                <div class="donut-info-row"><span class="label">Published</span><span class="value">{{ daily.published }}</span></div>
-                <div class="donut-info-row"><span class="label">Remaining</span><span class="value">{{ daily.remaining }}</span></div>
-                <div class="donut-info-row"><span class="label">Total</span><span class="value">{{ daily.total }}</span></div>
-            </div>
-        </div>
-        <div class="progress-track"><div class="progress-fill daily" style="width:{{ daily_pct }}%"></div></div>
-        {% if daily.start_date %}<div class="progress-dates"><span>{{ daily.start_date }}</span><span>{{ daily.end_date }}</span></div>{% endif %}
-    </div>
-
     <div class="progress-card info-card" data-reveal="up">
         <div class="progress-header">
             <div class="progress-tag"><div class="progress-dot info"></div><span class="progress-name">Infographics</span></div>
-            <span class="progress-time">16:00 CET</span>
+            <span class="progress-time">{% if paused %}<span style="color:#ef4444">PAUSED</span>{% else %}16:00 CET{% endif %}</span>
         </div>
         <div class="donut-row">
             <div class="donut-wrap">
@@ -1421,30 +1387,12 @@
         {% if infographic.start_date %}<div class="progress-dates"><span>{{ infographic.start_date }}</span><span>{{ infographic.end_date }}</span></div>{% endif %}
     </div>
 
-    <div class="progress-card evening-card" data-reveal="up">
-        <div class="progress-header">
-            <div class="progress-tag"><div class="progress-dot eve"></div><span class="progress-name">Evening Posts</span></div>
-            <span class="progress-time">20:00 CET</span>
-        </div>
-        <div class="donut-row">
-            <div class="donut-wrap">
-                <svg width="80" height="80" viewBox="0 0 80 80">
-                    <circle class="donut-track" cx="40" cy="40" r="30"/>
-                    <circle class="donut-fill" stroke="url(#gEvening)" cx="40" cy="40" r="30"
-                        stroke-dasharray="{{ C }}" stroke-dashoffset="{{ C - (C * eve_pct / 100) }}"
-                        style="--donut-glow: var(--evening-glow);"/>
-                </svg>
-                <span class="donut-pct">{{ eve_pct }}%</span>
-            </div>
-            <div class="donut-info">
-                <div class="donut-info-row"><span class="label">Published</span><span class="value">{{ evening.published }}</span></div>
-                <div class="donut-info-row"><span class="label">Remaining</span><span class="value">{{ evening.remaining }}</span></div>
-                <div class="donut-info-row"><span class="label">Total</span><span class="value">{{ evening.total }}</span></div>
-            </div>
-        </div>
-        <div class="progress-track"><div class="progress-fill eve" style="width:{{ eve_pct }}%"></div></div>
-        {% if evening.start_date %}<div class="progress-dates"><span>{{ evening.start_date }}</span><span>{{ evening.end_date }}</span></div>{% endif %}
+    {% if paused %}
+    <div class="progress-card" data-reveal="up" style="border: 1px solid rgba(239, 68, 68, 0.3); text-align: center; padding: 32px;">
+        <div style="font-size: 24px; color: #ef4444; font-weight: 700; margin-bottom: 8px;">PAUSED</div>
+        <div style="color: var(--text-secondary); font-size: 13px;">All automations suspended since 2026-03-25</div>
     </div>
+    {% endif %}
 </section>
 
 <!-- CALENDAR -->
@@ -1456,12 +1404,8 @@
         <span class="section-badge">3 months</span>
     </div>
     <div class="legend" data-reveal="fade">
-        <div class="legend-item"><span class="legend-dot daily-pub"></span>Daily pub</div>
-        <div class="legend-item"><span class="legend-dot daily-sch"></span>Daily sched</div>
-        <div class="legend-item"><span class="legend-dot info-pub"></span>Info pub</div>
-        <div class="legend-item"><span class="legend-dot info-sch"></span>Info sched</div>
-        <div class="legend-item"><span class="legend-dot eve-pub"></span>Evening pub</div>
-        <div class="legend-item"><span class="legend-dot eve-sch"></span>Evening sched</div>
+        <div class="legend-item"><span class="legend-dot info-pub"></span>Info published</div>
+        <div class="legend-item"><span class="legend-dot info-sch"></span>Info scheduled</div>
         <div class="legend-item"><span class="legend-dot today"></span>Today</div>
     </div>
     <div class="calendar-grid" data-reveal-stagger>
@@ -1475,10 +1419,8 @@
             <div class="days-grid">
                 {% for week in month.weeks %}{% for day in week %}{% if day is none %}<div class="cal-day empty"></div>{% else %}<div class="cal-day{% if day.is_today %} today{% endif %}" data-date="{{ day.date }}">
                     <span>{{ day.day }}</span>
-                    {% if day.has_daily or day.has_infographic or day.has_evening %}<div class="cal-dots">
-                        {% if day.has_daily %}<span class="cal-dot {% if day.daily_status == 'published' %}daily-pub{% else %}daily-sch{% endif %}"></span>{% endif %}
-                        {% if day.has_infographic %}<span class="cal-dot {% if day.infographic_status == 'published' %}info-pub{% else %}info-sch{% endif %}"></span>{% endif %}
-                        {% if day.has_evening %}<span class="cal-dot {% if day.evening_status == 'published' %}eve-pub{% else %}eve-sch{% endif %}"></span>{% endif %}
+                    {% if day.has_infographic %}<div class="cal-dots">
+                        <span class="cal-dot {% if day.infographic_status == 'published' %}info-pub{% else %}info-sch{% endif %}"></span>
                     </div>{% endif %}
                 </div>{% endif %}{% endfor %}{% endfor %}
             </div>
